@@ -1,16 +1,3 @@
-¡Excelente pregunta\! Es una duda muy importante para la entrega de tu proyecto.
-
-**Respuesta corta:** Tu profesor **no** deberá crear el contrato. Tú debes desplegarlo, obtener la dirección y poner esa misma dirección en los archivos de configuración tanto del frontend como del backend.
-
-**Explicación:** Piensa que tu contrato desplegado es como la base de datos central de tu aplicación. Para que el frontend, el backend y el agente puedan "hablar" entre sí y ver la misma información, todos deben apuntar a la **misma dirección de contrato**. Si tu profesor desplegara uno nuevo, estaría vacío y la aplicación no mostraría nada.
-
-Por eso, en el `README` he incluido una sección clara para que tu profesor sepa que el primer paso es desplegar el contrato y luego usar esa dirección para configurar el resto.
-
-Aquí tienes el `README` del backend, completamente formateado y listo para copiar y pegar, incluyendo esa sección.
-
------
-
-````
 # CodeFund Backend - API y Agente de Verificación Autónomo
 
 Este repositorio contiene el código fuente del backend para **CodeFund**, compuesto por dos servicios principales escritos en Python:
@@ -143,5 +130,3 @@ Debes ejecutar la API y el Agente en **dos terminales separadas**.
 - **Integración Completa con la Blockchain:** Lee datos de los contratos y envía transacciones de forma autónoma.
 - **Verificación de GitHub Funcional:** El agente puede confirmar la fusión de Pull Requests.
 - **Próximos Pasos:** Migrar el almacenamiento de metadatos a una base de datos real (ej. PostgreSQL) para mejorar la eficiencia y añadir capacidades de búsqueda y filtrado.
-
-````
