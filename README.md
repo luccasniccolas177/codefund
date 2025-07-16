@@ -1,99 +1,135 @@
-# CodeFund Backend - API REST con FastAPI
+# CodeFund Backend - API y Agente de Verificación Autónomo
 
-Este proyecto es el backend de **CodeFund**, una plataforma de crowdfunding basada en Web3 que permite financiar proyectos de forma segura y transparente. La API proporciona datos sobre campañas, milestones y permite crear nuevas campañas. En el futuro, se integrará con smart contracts para sincronizar datos on-chain.
+Este repositorio contiene el código fuente del backend para CodeFund, compuesto por dos servicios principales escritos en Python:
 
----
+    Una API RESTful (FastAPI): Actúa como un puente eficiente entre el frontend y la blockchain. Proporciona endpoints para consultar información de campañas y usuarios de forma rápida, evitando que el frontend tenga que hacer costosas llamadas a la blockchain para cada vista.
 
-## 🚀 Funcionalidad
+    Un Agente de Verificación Autónomo: Un script independiente que se ejecuta en segundo plano. Su misión es monitorear la blockchain, verificar las condiciones de los hitos en GitHub y enviar transacciones para aprobarlos automáticamente.
 
-✅ Proveer endpoints REST para:
-- Listar proyectos.
-- Ver detalles de un proyecto.
-- Crear nuevos proyectos.
+🚀 Funcionalidades Implementadas
 
-✅ Habilitar CORS para comunicación con frontend.  
-✅ Base de datos mock (en memoria).  
-✅ (Próximamente) Integración con blockchain para datos on-chain.
+✅ API RESTful:
 
----
+    Endpoints para listar todos los proyectos (/api/v1/projects).
 
-## 🛠️ Tecnologías utilizadas
+    Endpoint para ver los detalles completos de un proyecto, incluyendo sus hitos (/api/v1/projects/{address}).
 
-- **Framework:** FastAPI
-- **Servidor ASGI:** Uvicorn
-- **Modelado de datos:** Pydantic
-- **Lenguaje:** Python 3.10+
-- **Web3 (futuro):** Web3.py
+    Endpoints para el Dashboard de usuario: listar proyectos creados (/users/{address}/created) y contribuidos (/users/{address}/contributed).
 
----
+✅ Agente de Verificación:
 
-## ⚙️ Instalación
+    Escanea periódicamente todas las campañas en la blockchain.
 
-### 1. Clonar el repositorio
+    Para los hitos pendientes, extrae la URL de verificación (ej. un Pull Request de GitHub).
 
-```bash
+    Usa la API de GitHub para comprobar si el PR ha sido fusionado ("merged").
+
+    Si la condición se cumple, utiliza su propia wallet para enviar una transacción on-chain y aprobar el hito en el contrato inteligente correspondiente.
+
+🛠️ Pila Tecnológica
+
+    Framework API: FastAPI
+
+    Servidor ASGI: Uvicorn
+
+    Interacción Blockchain: Web3.py
+
+    Cliente HTTP (Agente): Requests
+
+    Gestión de Secretos: python-dotenv
+
+    Lenguaje: Python 3.10+
+
+⚙️ Instalación y Configuración
+Requisitos Previos
+
+    Python (versión 3.10 o superior)
+
+    Una dirección de contrato CampaignFactory desplegada en Sepolia.
+
+### 1. Clonar el repositorio y navegar a la carpeta
+
 git clone <repo_url>
-cd codefund-main
-```
+cd <nombre_del_repo>/app-backend
 
----
+### 2. Crear y activar un entorno virtual
 
-### 2. Crear entorno virtual (opcional pero recomendado)
+Crear el entorno
+python3 -m venv venv
 
-```bash
-python -m venv venv
-source venv/bin/activate          # macOS / Linux
-venv\Scripts\activate             # Windows
-```
+Activar en macOS / Linux
+source venv/bin/activate
 
----
+Activar en Windows
+venv\Scripts\activate
 
 ### 3. Instalar dependencias
 
-```bash
-pip install -r requirements.txt
-```
+pip install fastapi "uvicorn[standard]" web3 python-dotenv requests
 
----
+### 4. Configurar las variables de entorno
 
-## 🏃‍♂️ Cómo correr el backend
+Este es el paso más importante para que tanto la API como el Agente puedan funcionar.
 
-Ejecuta el servidor:
+    Crea un archivo llamado .env en la raíz de la carpeta app-backend.
 
-```bash
-uvicorn main:app --reload --port 8000
-```
+    Pega el siguiente contenido y rellena tus datos.
 
-Ejecuta el agente:
+    # =================================================
+    # === CONFIGURACIÓN PARA EL AGENTE (agent.py) ===
+    # =================================================
 
-```bash
-python3 agent.py
-```
+    # La clave privada de una wallet de Sepolia que actuará como el agente.
+    # ¡ASEGÚRATE DE QUE TENGA ETH DE SEPOLIA PARA PAGAR EL GAS!
+    AGENT_PRIVATE_KEY="0x..."
 
+    # Tu Token de Acceso Personal de GitHub (con permisos de lectura para repos y PRs).
+    GITHUB_PAT="github_pat_..."
 
-La API estará disponible en:
+    # =================================================
+    # === CONFIGURACIÓN PARA AMBOS (API Y AGENTE) ===
+    # =================================================
 
-- http://127.0.0.1:8000
+    # La URL de tu nodo de Sepolia (de Infura, Alchemy, etc.).
+    SEPOLIA_RPC_URL="https://sepolia.infura.io/v3/TU_API_KEY"
 
+    # La dirección de tu contrato CampaignFactory desplegado.
+    FACTORY_ADDRESS="0x...LA_DIRECCION_DE_TU_CONTRATO"
 
----
+🏃‍♂️ Cómo Correr los Servicios del Backend
 
-## 💡 Funcionamiento general
+Debes ejecutar la API y el Agente en dos terminales separadas.
+✅ Terminal 1: Levantar la API
 
-- La API provee endpoints REST para gestionar campañas de crowdfunding.
-- Los datos están en memoria como listas mock.
-- Está preparado para integrarse en el futuro con smart contracts en Solidity para:
-  - Validar montos on-chain.
-  - Registrar milestones cumplidos.
-  - Procesar refunds automáticamente.
+    En una terminal, navega a app-backend y activa el entorno virtual (source venv/bin/activate).
 
----
+    Establece las variables de entorno para la sesión actual: La API no lee el archivo .env, por lo que debes exportarlas.
 
-## 📈 Estado del proyecto
+    export SEPOLIA_RPC_URL="LA_URL_DE_TU_NODO_SEPOLIA"
+    export FACTORY_ADDRESS="LA_DIRECCION_DE_TU_CONTRATO"
 
-✅ Backend FastAPI operativo.  
-✅ Endpoints básicos implementados.  
-🔜 Integración real con blockchain (web3.py).  
-🔜 Persistencia en base de datos real.
+    Inicia el servidor:
 
+    uvicorn main:app --reload
 
+    La API estará disponible en http://127.0.0.1:8000.
+
+✅ Terminal 2: Ejecutar el Agente Autónomo
+
+    Abre una nueva terminal, navega a app-backend y activa el entorno virtual.
+
+    El agente leerá las variables del archivo .env, por lo que no necesitas exportarlas.
+
+    Inicia el agente:
+
+    python agent.py
+
+    Verás en la consola cómo el agente empieza a escanear la blockchain en busca de trabajo.
+
+📈 Estado del Proyecto
+
+✅ Backend FastAPI y Agente 100% Operativos. ✅ Integración Completa con la Blockchain: Lee datos de los contratos y envía transacciones de forma autónoma.
+
+✅ Verificación de GitHub Funcional: El agente puede confirmar la fusión de Pull Requests.
+
+🔜 Próximos Pasos: Migrar el almacenamiento de metadatos a una base de datos real (ej. PostgreSQL) para mejorar la eficiencia y añadir capacidades de búsqueda y filtrado.
